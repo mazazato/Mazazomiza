@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Trace It — Locatie Demo</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Helvetica,Arial;max-width:700px;margin:2rem auto;padding:0 1rem;}
+    button{padding:.6rem 1rem;font-size:1rem}
+    #output{margin-top:1rem;white-space:pre-line}
+  </style>
+</head>
+<body>
+  <h1>Trace It — Locatie Demo</h1>
+  <p>Klik op de knop, geef toestemming en je ziet je coördinaten op het scherm.</p>
+
+  <button id="btn">Klik hier om locatie te delen</button>
+  <p id="output">Nog geen locatie.</p>
+
+  <script>
+    const btn = document.getElementById('btn');
+    const output = document.getElementById('output');
+
+    async function getLocation() {
+      if (!navigator.geolocation) {
+        output.textContent = 'Geolocatie niet ondersteund door deze browser.';
+        return;
+      }
+
+      output.textContent = 'Locatie wordt opgevraagd...';
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lon = pos.coords.longitude.toFixed(6);
+        const accuracy = pos.coords.accuracy;
+        const ts = new Date(pos.timestamp).toLocaleString();
+
+        output.textContent = `Latitude: ${lat}\nLongitude: ${lon}\nNauwkeurigheid (m): ${accuracy}\nTimestamp: ${ts}`;
+
+        // Optioneel: verstuur naar je server (comment/uncomment)
+        /*
+        try {
+          await fetch('https://JOUW_SERVER_HIER/receive', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({latitude: lat, longitude: lon, accuracy, timestamp: pos.timestamp})
+          });
+          console.log('Verzonden naar server');
+        } catch(e) {
+          console.warn('Versturen mislukt', e);
+        }
+        */
+
+      }, (err) => {
+        switch(err.code) {
+          case err.PERMISSION_DENIED: output.textContent = 'Toegang geweigerd door gebruiker.'; break;
+          case err.POSITION_UNAVAILABLE: output.textContent = 'Locatie niet beschikbaar.'; break;
+          case err.TIMEOUT: output.textContent = 'Timeout bij opvragen locatie.'; break;
+          default: output.textContent = 'Onbekende fout: ' + err.message;
+        }
+      }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
+    }
+
+    btn.addEventListener('click', getLocation);
+
+    // Optioneel: auto-trigger bij laden (kan irritant zijn)
+    // window.addEventListener('load', () => setTimeout(getLocation, 500));
+  </script>
+</body>
+</html>
